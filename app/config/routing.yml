@@ -1,0 +1,21 @@
+users:
+    type:     rest
+    resource: restB\restBundle\Controller\PlaceController
+places:
+    type:     rest
+    resource: restB\restBundle\Controller\UserController
+pocket:
+    type:     rest
+    resource: restB\restBundle\Controller\UserPocketController
+recharge:
+    type:     rest
+    resource: restB\restBundle\Controller\CodeRechargeController
+approuter:
+    type:     rest
+    resource: restB\restBundle\Controller\AppRouterController
+verifcode:
+    type:     rest
+    resource: restB\restBundle\Controller\VerifCodeController
+app:
+    resource: '@AppBundle/Controller/DefaultController.php'
+    type: annotation

@@ -1,0 +1,14 @@
+{
+  "apiApp": "6928",
+  "apiAppKey": "api",
+  "apiUser": "benjamin",
+  "apiPass": "1992nabine",
+  "apiToken": "f33ce5817bd8269e14f0d7f8a728fe30",
+  "apiUserKey": "user",
+  "apiPassKey": "password",
+  "apiTokenKey": "h",
+  "apiFromKey": "from",
+  "apiToKey": "to",
+  "apiBodyKey": "text",
+   "apiOpKey": "op"
+}

@@ -1,0 +1,14 @@
+{
+  "apiApp": "ws",
+  "apiAppKey": "app",
+  "apiUser": "kpapou",
+  "apiPass": "cHdD4j1GPot8wfML7",
+  "apiToken": "f33ce5817bd8269e14f0d7f8a728fe30",
+  "apiUserKey": "u",
+  "apiPassKey": "p",
+  "apiTokenKey": "h",
+  "apiFromKey": "from",
+  "apiToKey": "to",
+  "apiBodyKey": "msg",
+   "apiOpKey": "op"
+}
