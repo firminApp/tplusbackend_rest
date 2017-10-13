@@ -5,22 +5,21 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class userPocketType extends AbstractType
+class SmsType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('transactionPhone');
-        $builder->add('solde');
-        $builder->add('accountNumber');
-        $builder->add('pass');
-        $builder->add('isOneline');
-
+        $builder->add('from');
+        $builder->add('to');
+        $builder->add('body');
+       // $builder->add('config');
+       // $builder->add('inUsing');
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => 'restB\restBundle\Entity\userPocket',
+            'data_class' => 'restB\restBundle\Entity\smsFromMaxiSms',
             'csrf_protection' => false
         ]);
     }

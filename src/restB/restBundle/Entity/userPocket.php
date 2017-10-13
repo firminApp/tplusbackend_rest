@@ -32,7 +32,7 @@ class userPocket
     /**
      * @var string
      *
-     * @ORM\Column(name="transactionPhone", type="string", length=255)
+     * @ORM\Column(name="transactionPhone", type="string", length=255,unique=true)
      */
     private $transactionPhone;
 
@@ -42,18 +42,33 @@ class userPocket
      * @ORM\Column(name="accountNumber", type="string", length=255)
      */
     private $accountNumber;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="isOneline", type="boolean")
+     */
+    private $isOneline;
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="pass", type="string", length=255)
+     */
+    private $pass;
       /**
      * @var string
      *
-     *@ORM\ManyToOne(targetEntity="user")
+     *@ORM\ManyToOne(targetEntity="user",cascade={"all"}, fetch="EAGER")
      */
     private $user;
    
 
+
+
     /**
      * Get id
      *
-     * @return int
+     * @return integer
      */
     public function getId()
     {
@@ -77,14 +92,12 @@ class userPocket
     /**
      * Get solde
      *
-     * @return int
+     * @return integer
      */
     public function getSolde()
     {
         return $this->solde;
     }
-
-
 
     /**
      * Set transactionPhone
@@ -135,6 +148,54 @@ class userPocket
     }
 
     /**
+     * Set isOneline
+     *
+     * @param boolean $isOneline
+     *
+     * @return userPocket
+     */
+    public function setIsOneline($isOneline)
+    {
+        $this->isOneline = $isOneline;
+
+        return $this;
+    }
+
+    /**
+     * Get isOneline
+     *
+     * @return boolean
+     */
+    public function getIsOneline()
+    {
+        return $this->isOneline;
+    }
+
+    /**
+     * Set pass
+     *
+     * @param string $pass
+     *
+     * @return userPocket
+     */
+    public function setPass($pass)
+    {
+        $this->pass = $pass;
+
+        return $this;
+    }
+
+    /**
+     * Get pass
+     *
+     * @return string
+     */
+    public function getPass()
+    {
+        return $this->pass;
+    }
+
+    /**
      * Set user
      *
      * @param \restB\restBundle\Entity\user $user
@@ -156,10 +217,5 @@ class userPocket
     public function getUser()
     {
         return $this->user;
-    }
-    public   function  updateSolde($montant){
-        $newSolde=$this->solde+$montant;
-        $this->setSolde($newSolde);
-        return $newSolde ;
     }
 }

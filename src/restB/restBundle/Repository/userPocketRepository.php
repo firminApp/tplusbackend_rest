@@ -1,6 +1,7 @@
 <?php
 
 namespace restB\restBundle\Repository;
+use restB\restBundle\Entity\userPocket;
 
 /**
  * userPocketRepository
@@ -10,4 +11,30 @@ namespace restB\restBundle\Repository;
  */
 class userPocketRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function resetSolde($tphone, $value){
+
+            //$qB = $this->createQueryBuilder('p');
+            $qB = $this->getEntityManager()->createQueryBuilder();
+            $qB ->update('restBundle:userPocket', 'p')
+                ->set('p.solde', '?1')
+                ->where('p.transactionPhone = ?2')
+                ->setParameter(1, $value)
+                ->setParameter(2, $tphone);
+
+            return $qB->getQuery()->execute();
+
+    }
+    public function resetConnexionStatut($tphone, $value){
+
+        //$qB = $this->createQueryBuilder('p');
+        $qB = $this->getEntityManager()->createQueryBuilder();
+        $qB ->update('restBundle:userPocket', 'p')
+            ->set('p.isOneline', '?1')
+            ->where('p.transactionPhone = ?2')
+            ->setParameter(1, $value)
+            ->setParameter(2, $tphone);
+
+        return $qB->getQuery()->execute();
+
+    }
 }

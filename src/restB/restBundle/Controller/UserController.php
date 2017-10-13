@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use restB\restBundle\Entity\user;
@@ -61,18 +62,15 @@ class UserController extends Controller
             $em->persist($user);
 
             $em->flush();
-            $codeverif =$this->generateCode();
+            $codeverif = $this->generateCode();
 
-            $this->sendCodeBySms($codeverif,$user->getTel());
-            $tel=$user->getTel();
-            return $this->redirect("http://74.207.224.67/api/http/sendmsg.php?user=benjamin&password=1992nabine&from=Maxi sms&to=$tel&text=$codeverif est votre code de vérification.&api=6928");
+              //  echo $apiresponse;
+                return new JsonResponse(['statut' => "succes", 'code' => $codeverif]);
 
+            }
+            else
+                return new JsonResponse(['statut' => "echec"]);
 
-            //return new JsonResponse(['statut' =>"succes",'code' =>$codeverif]);
-        } else {
-
-            return new JsonResponse(['statut' =>"echec"]);
-        }
     }
     /**
      * @Rest\View(statusCode=Response::HTTP_NO_CONTENT)

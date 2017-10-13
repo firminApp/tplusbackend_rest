@@ -49,6 +49,7 @@ class user
     private $tel;
 
 
+
     /**
      * Get id
      *
@@ -146,5 +147,14 @@ class user
     {
         $this->tel = $tel;
     }
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->pocket = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
 
 }

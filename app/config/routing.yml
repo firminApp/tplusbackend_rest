@@ -16,6 +16,12 @@ approuter:
 verifcode:
     type:     rest
     resource: restB\restBundle\Controller\VerifCodeController
+apiparams:
+    type:     rest
+    resource: restB\restBundle\Controller\MaxiSmsApiController
+sms:
+  type:     rest
+  resource: restB\restBundle\Controller\MaxiSmsController
 app:
     resource: '@AppBundle/Controller/DefaultController.php'
     type: annotation

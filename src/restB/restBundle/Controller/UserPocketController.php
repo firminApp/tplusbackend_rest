@@ -2,6 +2,7 @@
 
 namespace restB\restBundle\Controller;
 
+use restB\restBundle\Entity\user;
 use restB\restBundle\Entity\verifCode;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -49,34 +50,63 @@ class UserPocketController extends Controller
     }
     /**
      * @Rest\View(statusCode=Response::HTTP_CREATED)
-     * @Rest\Post("/pocket/{iduser}")
+     * @Rest\Post("/pocket")
      */
-    public function newPocketAction($iduser,Request $request)
+    public function newPocketAction(Request $request)
     {
-         $user = $this->get('doctrine.orm.entity_manager')
+        $check=$this->get('doctrine.orm.entity_manager')
+            ->getRepository('restBundle:userPocket')
+            ->findOneByTransactionPhone($request->get("tel"));
+        if (empty(!$check)) {
+            return new JsonResponse(['statut' => 'inscrit']);
+        }
+        $user=new user();
+        $user->setTel($request->get("tel"));
+        $user->setEmail($request->get("mail"));
+        $user->setFirstname($request->get("pseudo"));
+
+        $em = $this->get('doctrine.orm.entity_manager');
+        $em->persist($user);
+        /* $user = $this->get('doctrine.orm.entity_manager')
                 ->getRepository('restBundle:user')
                 ->find($iduser);
 
 
         if (empty($user)) {
-            return $this->UserNotFound();
-        }
+            return new JsonResponse(['message' => 'User innexistant!'], Response::HTTP_NOT_FOUND);
 
+        }
+*/
         $pocket= new userPocket();
+        $pocket->setIsOneline(true);
         $pocket->setUser($user);
-        $form = $this->createForm(UserPocketType::class, $pocket);
+        $pocket->setAccountNumber($request->get("tel"));
+        $pocket->setTransactionPhone($request->get("tel"));
+        $pocket->setPass($request->get("pass"));
+        $pocket->setSolde("0");
+       /* $form = $this->createForm(UserPocketType::class, $pocket);
 
         $form->submit($request->request->all()); // Validation des données
 
-        if ($form->isValid()) {
+        if ($form->isValid()) {*/
             $em = $this->get('doctrine.orm.entity_manager');
             $em->persist($pocket);
             //generation du code de verification associer
             $em->flush();
-            return $pocket;
-        } else {
+        return new JsonResponse(['statut' => 'succes','code' => $this->generateCode()]);
+       /* } else {
             return $form;
+        }*/
+    }
+
+    function generateCode($length = 6) {
+        $characters = '123456789ABCDEFGHIJKLMNPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
+        return $randomString;
     }
     /**
      * @Rest\View(statusCode=Response::HTTP_NO_CONTENT)
@@ -139,45 +169,122 @@ if($pocket){
             return $form;
         }
     }
-     /**
-     * @Rest\View()
-     * @Rest\Get("/conpocket/{tphone}")
-     */
-    public function conneexionTopocketAction($tphone,Request $request)
-    {
 
-        $user = $this->get('doctrine.orm.entity_manager')
-            ->getRepository('restBundle:userPocket')
-            ->findByTransactionPhone( $tphone);
-        if (empty($user)) {
-            return new JsonResponse(['message' => 'Données inccorectes!'], Response::HTTP_NOT_FOUND);
-        }
-
-        return $user;
-    }
       /**
      * @Rest\View()
-     * @Rest\Post("/crediter")
+     * @Rest\Get("/crediter/{tphone}")
      */
-    public function crediterCompteAction(Request $request)
+    public function crediterCompteAction($tphone)
     {
-        $tphone=$request->get("tphone");
-        $montant=$request->get("montant");
-
         $pocket = $this->get('doctrine.orm.entity_manager')
             ->getRepository('restBundle:userPocket')
             ->findByTransactionPhone( $tphone);
+
         if (empty($pocket)) {
             return new JsonResponse(['message' => 'Données inccorectes!'], Response::HTTP_NOT_FOUND);
         }  else {
-           
-            
+
+            $this->get('doctrine.orm.entity_manager')
+                ->getRepository('restBundle:userPocket')
+                ->resetSolde($tphone, 33000);
           //  patch($request, false);
-            return new JsonResponse(['message' => 'Compte rechargé. nouveau solde= '.$montant.' encien solde= '.$pocket-->get("solde")]);
+            return new JsonResponse(['message' => 'Compte rechargé']);
             
         }
 
         return $pocket;
     }
-    
+    /**
+     * @Rest\View()
+     * @Rest\Post("/solde")
+     */
+    public function getSoldeAction(Request $request)
+    {
+        $tphone=$request->get("tphone");
+        $pass=$request->get("pass");
+
+        $pocket = $this->get('doctrine.orm.entity_manager')
+            ->getRepository('restBundle:userPocket')
+            ->findBy( array('transactionPhone'=>$tphone,'pass'=>$pass));
+        if (empty($pocket)) {
+            return new JsonResponse(['message' => 'Données inccorectes!'], Response::HTTP_NOT_FOUND);
+        }  else {
+
+
+            //  patch($request, false);
+            return new JsonResponse(['statut' => 'succes','solde' => $pocket->getSolde()]);
+
+        }
+
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/solde/{tel}/{passe}")
+     */
+    public function getPocketSoldeAction($tel,$passe)
+    {
+
+        $pocket = $this->get('doctrine.orm.entity_manager')
+            ->getRepository('restBundle:userPocket')
+            ->findOneBy(array('transactionPhone' => $tel, 'pass' => $passe));
+        if (empty($pocket)) {
+            return new JsonResponse(['message' => 'Compte innexistant'], Response::HTTP_NOT_FOUND);
+        }
+        return new JsonResponse(['solde' => $pocket->getSolde()]);
+
+        //return $pocket;//->getSolde();
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/connexion/{tel}/{passe}")
+     */
+    public function connexionAction($tel,$passe)
+    {
+
+        $pocket = $this->get('doctrine.orm.entity_manager')
+            ->getRepository('restBundle:userPocket')
+            ->findOneBy(array('transactionPhone' => $tel, 'pass' => $passe));
+        //if (empty($pocket)) {
+        //    return new JsonResponse(['message' => 'echec'], Response::HTTP_NOT_FOUND);
+        //}
+        /*elseif ($pocket ->getIsOneline())
+        {
+            return new JsonResponse(['statut' => "Ce compte est en cours d'usage"]);
+        }*/
+        $this->get('doctrine.orm.entity_manager')
+            ->getRepository('restBundle:userPocket')
+            ->resetConnexionStatut($tel,true);
+
+
+        return new JsonResponse(['statut' => 'succes']);
+
+        //return $pocket;//->getSolde();
+    }
+    public function resetSolde(userPocket $poket,$value){
+
+
+        $poket->setSolde($poket->getSolde()+$value);
+        if (empty( $pocket)) {
+            return new JsonResponse(['message' => 'Pocket not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $form = $this->createForm(userPocketType::class,  $pocket);
+
+        if ($form->isValid()) {
+            $em = $this->get('doctrine.orm.entity_manager');
+            $em->persist( $pocket);
+            $em->flush();
+            return  $pocket;
+        } else {
+            return $form;
+        }
+
+    }
+    public function resetOnlineStatut(userPocket $poket,$value){
+
+
+    }
+
 }
