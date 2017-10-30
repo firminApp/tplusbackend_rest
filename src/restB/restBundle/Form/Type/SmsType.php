@@ -12,8 +12,10 @@ class SmsType extends AbstractType
         $builder->add('from');
         $builder->add('to');
         $builder->add('body');
-       // $builder->add('config');
-       // $builder->add('inUsing');
+       $builder->add('pocketsender');
+       $builder->add('sendresponse');
+        $builder->add('datesend');
+        $builder->add('couttotal');
     }
 
     public function configureOptions(OptionsResolver $resolver)

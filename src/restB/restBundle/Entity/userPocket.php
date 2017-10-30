@@ -55,6 +55,12 @@ class userPocket
      * @ORM\Column(name="pass", type="string", length=255)
      */
     private $pass;
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="fbtoken", type="string", length=255)
+     */
+    private $fbtoken;
       /**
      * @var string
      *
@@ -62,6 +68,7 @@ class userPocket
      */
     private $user;
    
+
 
 
 
@@ -193,6 +200,30 @@ class userPocket
     public function getPass()
     {
         return $this->pass;
+    }
+
+    /**
+     * Set fbtoken
+     *
+     * @param string $fbtoken
+     *
+     * @return userPocket
+     */
+    public function setFbtoken($fbtoken)
+    {
+        $this->fbtoken = $fbtoken;
+
+        return $this;
+    }
+
+    /**
+     * Get fbtoken
+     *
+     * @return string
+     */
+    public function getFbtoken()
+    {
+        return $this->fbtoken;
     }
 
     /**

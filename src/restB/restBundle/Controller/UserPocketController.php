@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use restB\restBundle\Entity\userPocket;
 use restB\restBundle\Form\Type\userPocketType;
+use Csa\Bundle\GuzzleBundle;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
 
@@ -67,37 +68,27 @@ class UserPocketController extends Controller
 
         $em = $this->get('doctrine.orm.entity_manager');
         $em->persist($user);
-        /* $user = $this->get('doctrine.orm.entity_manager')
-                ->getRepository('restBundle:user')
-                ->find($iduser);
 
-
-        if (empty($user)) {
-            return new JsonResponse(['message' => 'User innexistant!'], Response::HTTP_NOT_FOUND);
-
-        }
-*/
         $pocket= new userPocket();
         $pocket->setIsOneline(true);
         $pocket->setUser($user);
         $pocket->setAccountNumber($request->get("tel"));
         $pocket->setTransactionPhone($request->get("tel"));
         $pocket->setPass($request->get("pass"));
-        $pocket->setSolde("0");
-       /* $form = $this->createForm(UserPocketType::class, $pocket);
+        $pocket->setFbtoken($request->get("fbtoken"));
+        $pocket->setSolde("135");
+        $code=$this->generateCode();
+        $client = new \GuzzleHttp\Client();
+        $body=$code.' est votre code de vérification';
+        $res = $client->request('GET', 'http://74.207.224.67/api/http/sendmsg.php?user=benjamin&password=1992nabine&api=6928&h=f33ce5817bd8269e14f0d7f8a728fe30&from=Maxi sms&to='.$request->get("tel").'&text='.$body);
 
-        $form->submit($request->request->all()); // Validation des données
-
-        if ($form->isValid()) {*/
             $em = $this->get('doctrine.orm.entity_manager');
             $em->persist($pocket);
-            //generation du code de verification associer
             $em->flush();
-        return new JsonResponse(['statut' => 'succes','code' => $this->generateCode()]);
-       /* } else {
-            return $form;
-        }*/
-    }
+
+            return new JsonResponse(["statut"=>"succes","message"=>"Effectué","code"=>$code]);//$this->redirect("http://74.207.224.67/api/http/sendmsg.php?user=benjamin&password=1992nabine&api=6928&h=f33ce5817bd8269e14f0d7f8a728fe30&from=$from&to=$to&text=$body");
+
+          }
 
     function generateCode($length = 6) {
         $characters = '123456789ABCDEFGHIJKLMNPQRSTUVWXYZ';
@@ -137,7 +128,7 @@ if($pocket){
      * @Rest\View()
      * @Rest\Patch("/pocket/{id}")
      */
-    public function patchUserPocketAction(Request $request)
+    public function patchPocketAction(Request $request)
     {
         return $this->updatePocket($request, false);
     }
@@ -172,23 +163,31 @@ if($pocket){
 
       /**
      * @Rest\View()
-     * @Rest\Get("/crediter/{tphone}")
+     * @Rest\Get("/crediter/{tphone}/{code}")
      */
-    public function crediterCompteAction($tphone)
+    public function crediterCompteAction($tphone, $code)
     {
+        $code=$this->get('doctrine.orm.entity_manager')
+            ->getRepository('restBundle:codeRecharge')
+            ->findOneByCodeRecharge( $code);
         $pocket = $this->get('doctrine.orm.entity_manager')
             ->getRepository('restBundle:userPocket')
-            ->findByTransactionPhone( $tphone);
+            ->findOneByTransactionPhone( $tphone);
+        if (empty($code)||empty($pocket)) {
+            return new JsonResponse(['statut' => 'erronne','message' => 'Données inccorectes!'], Response::HTTP_NOT_FOUND);
+        }
+         else {
 
-        if (empty($pocket)) {
-            return new JsonResponse(['message' => 'Données inccorectes!'], Response::HTTP_NOT_FOUND);
-        }  else {
-
+            $montant=  $code->getMontant();
+           // $oldSold=$pocket->getSolde();
+            $newSold=$pocket->getSolde()+$montant;
             $this->get('doctrine.orm.entity_manager')
                 ->getRepository('restBundle:userPocket')
-                ->resetSolde($tphone, 33000);
+                ->resetSolde($tphone, $newSold);
           //  patch($request, false);
-            return new JsonResponse(['message' => 'Compte rechargé']);
+            return new JsonResponse(['statut' => 'succes','message' => 'Compte rechargé',
+                'montant' => $montant,
+                'solde' => $newSold]);
             
         }
 
@@ -231,7 +230,9 @@ if($pocket){
         if (empty($pocket)) {
             return new JsonResponse(['message' => 'Compte innexistant'], Response::HTTP_NOT_FOUND);
         }
-        return new JsonResponse(['solde' => $pocket->getSolde()]);
+        return new JsonResponse(['solde' => $pocket->getSolde(),
+            'cousParSms' => 45,
+            'pseudo' => $pocket->getUser()->getFirstname()]);
 
         //return $pocket;//->getSolde();
     }
@@ -242,12 +243,19 @@ if($pocket){
      */
     public function connexionAction($tel,$passe)
     {
+      /* // todo a enlever bientot
+        //++++++++++++++++++
+        if(empty($tel)||empty($passe))
+            return new JsonResponse(["statut"=>"echec","message"=>"Les informations fournies sont incorrect"]);
+        //return print "Message bien envoyer au $tel";
+        return new JsonResponse(["statut"=>"succes","message"=>"Utilisateur connecté"]);
+        //++++++++++++++++++*/
 
         $pocket = $this->get('doctrine.orm.entity_manager')
             ->getRepository('restBundle:userPocket')
             ->findOneBy(array('transactionPhone' => $tel, 'pass' => $passe));
-        //if (empty($pocket)) {
-        //    return new JsonResponse(['message' => 'echec'], Response::HTTP_NOT_FOUND);
+        if (empty($pocket))
+           return new JsonResponse(['message' => 'echec'], Response::HTTP_NOT_FOUND);
         //}
         /*elseif ($pocket ->getIsOneline())
         {
@@ -259,6 +267,32 @@ if($pocket){
 
 
         return new JsonResponse(['statut' => 'succes']);
+
+        //return $pocket;//->getSolde();
+    }
+    /**
+     * @Rest\View()
+     * @Rest\Get("/connexion/{tel}/{passe}/{token}")
+     */
+    public function refreshFBtoken($tel,$passe, $token)
+    {
+
+        $pocket = $this->get('doctrine.orm.entity_manager')
+            ->getRepository('restBundle:userPocket')
+            ->findOneBy(array('transactionPhone' => $tel, 'pass' => $passe));
+        if (empty($pocket))
+            return new JsonResponse(['message' => 'echec utilisateur inconnu'], Response::HTTP_NOT_FOUND);
+        //}
+        /*elseif ($pocket ->getIsOneline())
+        {
+            return new JsonResponse(['statut' => "Ce compte est en cours d'usage"]);
+        }*/
+        $this->get('doctrine.orm.entity_manager')
+            ->getRepository('restBundle:userPocket')
+            ->refreshFtoken($tel,$passe,$token);
+
+
+        return new JsonResponse(['statut' => 'succes', 'token' => $token]);
 
         //return $pocket;//->getSolde();
     }
@@ -286,5 +320,25 @@ if($pocket){
 
 
     }
+//todo test pour le service de owotransport
+    /**
+     * @Rest\View()
+     * @Rest\Get("/connect/{user}/{passe}")
+     */
+    function connectUserAction($user,$passe){
+        if(empty($user)||empty($passe))
+            return new JsonResponse(["statut"=>"echec","message"=>"Les informations fournies sont incorrect"]);
+        //return print "Message bien envoyer au $tel";
+        return new JsonResponse(["statut"=>"succes","message"=>"Utilisateur connecté"]);
 
+    }
+    //remplissage de la table de code recharge par les appRouters
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/connect/{token}")
+     */
+    function getGeneratedCodeAction(Request $request){
+
+    }
 }

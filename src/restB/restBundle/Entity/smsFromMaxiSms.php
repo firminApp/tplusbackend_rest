@@ -5,10 +5,10 @@ namespace restB\restBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * user
  *
- * @ORM\Table(name="smsFromMaxi")
- * @ORM\Entity(repositoryClass="restB\restBundle\Repository\userRepository")
+ *
+ * @ORM\Table(name="smsFromMaxiSms")
+ * @ORM\Entity(repositoryClass="restB\restBundle\Repository\smsFromMaxiSmsRepository")
  */
 class smsFromMaxiSms
 {
@@ -25,49 +25,51 @@ class smsFromMaxiSms
     /**
      * @var string
      *
-     * @ORM\Column(name="from", type="string", length=255, nullable=true)
+     * @ORM\Column(name="msg_from", type="string", length=255, nullable=true)
      */
     private $from;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="to", type="string", length=255, nullable=true)
+     * @ORM\Column(name="msg_to", type="string", length=255, nullable=true)
      */
     private $to;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="email", type="string", length=255, nullable=true)
-     */
-    private $email;
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="body", type="string", length=255, nullable=true)
-     */
-    private $body;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="userTel", type="string", length=255, nullable=true)
+     * @ORM\Column(name="msg_body", type="string", length=255, nullable=true)
      */
-    private $userTel;
+    private $body;
+
+
+
     /**
      * @var string
      *
-     * @ORM\Column(name="statut", type="string", length=255, nullable=true)
+     * @ORM\Column(name="sender", type="string", length=255, nullable=true)
      */
-    private $statut;
+    private $pocketsender;
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="couttotal", type="integer", length=255, nullable=true)
+     */
+    private $couttotal;
     /**
      * @var string
      *
      * @ORM\Column(name="datesend", type="string", length=255, nullable=true)
      */
     private $datesend;
-
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="sendresponse", type="string", length=255, nullable=true)
+     */
+    private $sendresponse;
 
 
 
@@ -130,30 +132,6 @@ class smsFromMaxiSms
     }
 
     /**
-     * Set email
-     *
-     * @param string $email
-     *
-     * @return smsFromMaxiSms
-     */
-    public function setEmail($email)
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    /**
-     * Get email
-     *
-     * @return string
-     */
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    /**
      * Set body
      *
      * @param string $body
@@ -178,51 +156,59 @@ class smsFromMaxiSms
     }
 
     /**
-     * Set userTel
+     * Set pocketsender
      *
-     * @param string $userTel
+     * @param string $pocketsender
      *
      * @return smsFromMaxiSms
      */
-    public function setUserTel($userTel)
+    public function setPocketsender($pocketsender)
     {
-        $this->userTel = $userTel;
+        $this->pocketsender = $pocketsender;
 
         return $this;
     }
 
     /**
-     * Get userTel
+     * Get pocketsender
      *
      * @return string
      */
-    public function getUserTel()
+    public function getPocketsender()
     {
-        return $this->userTel;
+        return $this->pocketsender;
     }
 
     /**
-     * Set statut
+     * Set couttotal
      *
-     * @param string $statut
+     * @param integer $couttotal
      *
      * @return smsFromMaxiSms
      */
-    public function setStatut($statut)
+    public function setCouttotal($couttotal)
     {
-        $this->statut = $statut;
+        $this->couttotal = $couttotal;
 
         return $this;
     }
 
     /**
-     * Get statut
+     * Get couttotal
      *
-     * @return string
+     * @return integer
      */
-    public function getStatut()
+    public function getCouttotal()
     {
-        return $this->statut;
+        return $this->couttotal;
+    }
+
+
+
+
+    public function __toString()
+    {
+        return 'sms:{ body:'.$this->body.' sender:'.$this->pocketsender.'date: '.$this->datesend; // if you have a name property you can do $this->getName();
     }
 
     /**
@@ -247,5 +233,29 @@ class smsFromMaxiSms
     public function getDatesend()
     {
         return $this->datesend;
+    }
+
+    /**
+     * Set sendresponse
+     *
+     * @param string $sendresponse
+     *
+     * @return smsFromMaxiSms
+     */
+    public function setSendresponse($sendresponse)
+    {
+        $this->sendresponse = $sendresponse;
+
+        return $this;
+    }
+
+    /**
+     * Get sendresponse
+     *
+     * @return string
+     */
+    public function getSendresponse()
+    {
+        return $this->sendresponse;
     }
 }

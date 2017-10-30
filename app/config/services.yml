@@ -33,3 +33,11 @@ services:
     # AppBundle\Service\ExampleService:
     #     arguments:
     #         $someArgument: 'some_value'
+
+services:
+    app.oceanicsms:
+        class: AppBundle\Oceanicsms
+        arguments:
+            - '@csa_guzzle.client.oceanicsms'
+            - '@jms_serializer'
+

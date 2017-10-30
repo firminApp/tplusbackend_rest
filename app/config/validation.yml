@@ -79,3 +79,16 @@ estBundle\Entity\verifCode:
         code:
             - NotBlank: ~
             - Type: string
+restBundle\Entity\smsFromMaxiSms:
+    constraints:
+            - Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity: name
+    properties:
+        to:
+            - NotBlank: ~
+            - Type: string
+        from:
+            - NotBlank: ~
+            - Type: string
+        body:
+            - NotBlank: ~
+            - Type: string

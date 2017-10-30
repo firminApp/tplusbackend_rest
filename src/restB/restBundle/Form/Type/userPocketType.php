@@ -13,6 +13,7 @@ class userPocketType extends AbstractType
         $builder->add('solde');
         $builder->add('accountNumber');
         $builder->add('pass');
+        $builder->add('fbtoken');
         $builder->add('isOneline');
 
     }

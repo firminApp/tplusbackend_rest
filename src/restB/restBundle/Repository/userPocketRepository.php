@@ -37,4 +37,19 @@ class userPocketRepository extends \Doctrine\ORM\EntityRepository
         return $qB->getQuery()->execute();
 
     }
+    public function refreshFtoken($tphone, $pass,$token){
+
+        //$qB = $this->createQueryBuilder('p');
+        $qB = $this->getEntityManager()->createQueryBuilder();
+        $qB ->update('restBundle:userPocket', 'p')
+            ->set('p.fbtoken', '?1')
+            ->where('p.transactionPhone = ?2')
+            ->where('p.pass = ?3')
+            ->setParameter(1, $token)
+            ->setParameter(2, $tphone)
+        ->setParameter(3, $pass);
+
+        return $qB->getQuery()->execute();
+
+    }
 }

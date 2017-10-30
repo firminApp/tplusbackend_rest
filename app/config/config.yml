@@ -80,4 +80,8 @@ fos_rest:
     format_listener:
         rules:
             - { path: '^/', priorities: ['json'], fallback_format: 'json' }
-
+csa_guzzle:
+    clients:
+        oceanics:
+            config:
+                base_uri: http://74.207.224.67/api/http/sendmsg.php

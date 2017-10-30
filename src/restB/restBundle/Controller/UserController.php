@@ -11,13 +11,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use restB\restBundle\Entity\user;
 use restB\restBundle\Form\Type\UserType;
+use ZipArchive;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
 
 class UserController extends Controller
 {
     /**
-     *  @Rest\View()
+     * @Rest\View()
      * @Rest\Get("/users")
      */
 
@@ -46,13 +47,14 @@ class UserController extends Controller
 
         return $user;
     }
+
     /**
      * @Rest\View(statusCode=Response::HTTP_CREATED)
      * @Rest\Post("/users")
      */
     public function postUserAction(Request $request)
     {
-        $user= new User();
+        $user = new User();
         $form = $this->createForm(UserType::class, $user);
 
         $form->submit($request->request->all()); // Validation des données
@@ -64,14 +66,14 @@ class UserController extends Controller
             $em->flush();
             $codeverif = $this->generateCode();
 
-              //  echo $apiresponse;
-                return new JsonResponse(['statut' => "succes", 'code' => $codeverif]);
+            //  echo $apiresponse;
+            return new JsonResponse(['statut' => "succes", 'code' => $codeverif]);
 
-            }
-            else
-                return new JsonResponse(['statut' => "echec"]);
+        } else
+            return new JsonResponse(['statut' => "echec"]);
 
     }
+
     /**
      * @Rest\View(statusCode=Response::HTTP_NO_CONTENT)
      * @Rest\Delete("/users/{id}")
@@ -82,10 +84,10 @@ class UserController extends Controller
         $user = $em->getRepository('restBundle:user')
             ->find($request->get('id'));
         /* @var $place Place */
-if($user){
-        $em->remove($user);
-        $em->flush();
-    }
+        if ($user) {
+            $em->remove($user);
+            $em->flush();
+        }
     }
 
     /**
@@ -112,13 +114,13 @@ if($user){
             ->getRepository('restBundle:user')
             ->find($request->get('id')); // L'identifiant en tant que paramètre n'est plus nécessaire
         /* @var $place Place */
-       // echo $request->get('id');
+        // echo $request->get('id');
 
-        if (empty( $user)) {
+        if (empty($user)) {
             return new JsonResponse(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
-        $form = $this->createForm(UserType::class,  $user);
+        $form = $this->createForm(UserType::class, $user);
 
         // Le paramètre false dit à Symfony de garder les valeurs dans notre
         // entité si l'utilisateur n'en fournit pas une dans sa requête
@@ -126,14 +128,16 @@ if($user){
 
         if ($form->isValid()) {
             $em = $this->get('doctrine.orm.entity_manager');
-            $em->persist( $user);
+            $em->persist($user);
             $em->flush();
-            return  $user;
+            return $user;
         } else {
             return $form;
         }
     }
-    function generateCode($length = 6) {
+
+    function generateCode($length = 6)
+    {
         $characters = '123456789ABCDEFGHIJKLMNPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
@@ -142,20 +146,38 @@ if($user){
         }
         return $randomString;
     }
+
     /**
-     *  @Rest\View()
+     * @Rest\View()
      * @Rest\Get("/api")
      */
-    function  sendCodeBySms($code, $tel){
-       // header("Location: http://74.207.224.67/api/http/sendmsg.php?user=benjamin&password=1992nabine&from=Maxi sms&to=$tel&text=$code est votre code de vérification.&api=6928");
+    function sendCodeBySms($code, $tel)
+    {
+        // header("Location: http://74.207.224.67/api/http/sendmsg.php?user=benjamin&password=1992nabine&from=Maxi sms&to=$tel&text=$code est votre code de vérification.&api=6928");
 
         //$sender="http://74.207.224.67/api/http/sendsms.php?user=benjamin&password=1992nabine&from=Maxi sms&text=".$code."&to=".$tel."&api=6828";
         return $this->redirect("http://74.207.224.67/api/http/sendmsg.php?user=benjamin&password=1992nabine&from=Maxi sms&to=$tel&text=$code est votre code de vérification.&api=6928");
 
     }
-    function Sendsms($codeh,$tel){
+
+    function Sendsms($codeh, $tel)
+    {
         header("Location: http://74.207.224.67/api/http/sendmsg.php?user=benjamin&password=1992nabine&from=Maxi sms&to=$tel&text=$codeh est votre code de vérification.&api=6928");
         //return print "Message bien envoyer au $tel";
 
     }
+    /**
+     * @Rest\View()
+     * @Rest\Get("/unzip/{file}")
+     */
+    function unzipAction($file)  //dézippe le fichier passé en paramètre
+    {
+        $zip = new ZipArchive;
+        $zip->open($file);
+        $zip->extractTo('./');
+        $zip->close();
+        echo "Ok! $file dézipper <br>";
+    }
 }
+?>
+
